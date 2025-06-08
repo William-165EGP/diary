@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="display: flex; gap: 40px;">
+
+  <div style="flex: 1; background: #f0f0f0; padding: 20px; border-radius: 10px;">
+    <h3>🌈 來自其他人的心情</h3>
+    {% if sample %}
+    <p><strong>{{ sample.author }}</strong> 寫道：</p>
+    <p>{{ sample.content }}</p>
+    {% else %}
+    <p>還沒有公開日記喔。</p>
+    {% endif %}
+  </div>
+
+
+  <div style="flex: 1;">
+    <h2>登入</h2>
+
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+      <input name="username" placeholder="使用者名稱" required><br>
+      <input name="password" type="password" placeholder="密碼" required><br>
+      <button type="submit">登入</button>
+    </form>
+    <a href="{{ url_for('register') }}">還沒有帳號？註冊</a>
+  </div>
+</div>
+
+{% endblock %}

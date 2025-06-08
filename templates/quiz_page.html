@@ -1,0 +1,381 @@
+<head><style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+.option-label {
+  display: block;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.option-label:hover {
+  border-color: var(--cr-main-1);
+  background-color: #f0faff;
+}
+
+input[type="radio"]:checked + .option-label {
+  border-color: var(--cr-3);
+  background-color: var(--cr-1);
+  box-shadow: 0 0 8px var(--cr-3);
+  transform: scale(1.02);
+}
+
+.options label:hover span {
+  background-color: var(--cr-1);
+  box-shadow: 0 0 8px var(--cr-1);
+}
+
+.options label {
+  display: block;
+  padding: 0.4rem 0.8rem;
+  line-height: 1.5;
+  font-size: 1rem;
+  border-radius: 10px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.options input[type="radio"] {
+  display: none;
+}
+
+.options input[type="radio"]:checked + span {
+  background-color: var(--cr-2);
+  box-shadow: 0 0 10px var(--cr-2);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+button[type="submit"] {
+  margin-top: 2rem;
+  padding: 0.75rem 2.5rem;
+  border: none;
+  background: var(--cr-3);
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transition: all 0.2s ease;
+}
+
+button[type="submit"]:not(:disabled):hover {
+  background: var(--cr-4);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+button[type="submit"]:not(:disabled):active {
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+:root {
+  --cr-main-1: #a0d6e6;
+  --cr-main-2: #f7a7e7;
+  --cr-1: color-mix(in srgb, var(--cr-main-1), var(--cr-main-2) 20%);
+  --cr-2: color-mix(in srgb, var(--cr-main-1), var(--cr-main-2) 35%);
+  --cr-3: color-mix(in srgb, var(--cr-main-1), var(--cr-main-2) 50%);
+  --cr-4: color-mix(in srgb, var(--cr-main-1), var(--cr-main-2) 65%);
+  --cr-5: color-mix(in srgb, var(--cr-main-1), var(--cr-main-2) 80%);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background-color: #fffafc;
+  padding: 2rem;
+  display: block;
+}
+
+.result-container {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 2rem auto;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  line-height: 1.8;
+}
+
+.blobs {
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: blur(140px);
+}
+
+.blob {
+  width: max(240px, 28vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.blob:nth-of-type(1) { background: var(--cr-main-1); }
+.blob:nth-of-type(2) { background: var(--cr-main-2); }
+.blob:nth-of-type(3) { background: var(--cr-1); }
+.blob:nth-of-type(4) { background: whitesmoke; }
+.blob:nth-of-type(5) { background: var(--cr-3); }
+.blob:nth-of-type(6) { background: var(--cr-4); }
+.blob:nth-of-type(7) { background: var(--cr-2); }
+
+main {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+h1 {
+  text-align: center;
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+
+.question {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.question:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.question p {
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.options label {
+  display: block;
+  padding: 0.4rem 0;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+#prev-btn,
+#next-btn,
+#submit-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  background: var(--cr-3);
+  color: white;
+  transition: background 0.2s ease;
+}
+
+#prev-btn:hover,
+#next-btn:hover,
+#submit-btn:hover {
+  background: var(--cr-4);
+}
+
+
+button[type="submit"] {
+  margin-top: 2rem;
+  padding: 0.75rem 2.5rem;
+  border: none;
+  background: var(--cr-3);
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style></head>{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .menu-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .menu-toggle {
+    font-size: 30px;
+    cursor: pointer;
+    padding: 10px;
+  }
+
+  .dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 10;
+    padding: 10px;
+    min-width: 150px;
+  }
+
+  .dropdown a {
+    display: block;
+    padding: 8px;
+    text-decoration: none;
+    color: black;
+  }
+
+  .dropdown a:hover {
+    background-color: #f2f2f2;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: #fffafc;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .blobs {
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    filter: blur(120px);
+  }
+
+  .blob {
+    width: max(240px, 28vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    position: absolute;
+    animation: horizontal-float 3s ease-in-out infinite alternate;
+  }
+
+  .blob:nth-child(1) {
+    background: var(--cr-main-1);
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .blob:nth-child(2) {
+    background: var(--cr-main-2);
+    top: 60%;
+    left: 70%;
+    animation-delay: 0s;
+  }
+
+  @keyframes horizontal-float {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(100px); }
+  }
+
+</style>
+<div class="menu-wrapper">
+<div class="menu-toggle" onclick="toggleMenu()">☰</div>
+<div class="dropdown" id="dropdownMenu">
+<a href="/">所有日記</a>
+<a href="/my_diary">我的日記</a>
+<a href="/game">遊戲</a>
+</div>
+</div>
+<script>
+  const dropdown = document.getElementById('dropdownMenu');
+  function toggleMenu() {
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  }
+  document.addEventListener('click', function(event) {
+    const isClickInside = dropdown.contains(event.target) || event.target.classList.contains('menu-toggle');
+    if (!isClickInside) dropdown.style.display = 'none';
+  });
+</script>
+<div class="blobs">
+  <div class="blob"></div>
+  <div class="blob"></div>
+</div>
+<div class="result-container">
+<h2>{{ quiz.title }}</h2>
+<p>{{ quiz.description }}</p>
+<h3>第 {{ page }} 題（共 {{ total }} 題）</h3>
+<p><strong>{{ q.text }}</strong></p>
+<form method="post">
+  <div class="options">
+    {% for opt, val in zip(q["options"], q["values"]) %}
+    <input type="radio" name="{{ q.id }}" value="{{ val }}" id="{{ q.id }}_{{ loop.index }}" required hidden>
+    <label for="{{ q.id }}_{{ loop.index }}" class="option-label">
+      {{ opt }}
+    </label>
+    {% endfor %}
+  </div>
+  <button type="submit">下一題</button>
+</form>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const radios = document.querySelectorAll('input[type="radio"]');
+      const submitBtn = document.querySelector('button[type="submit"]');
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = 0.5;
+        submitBtn.style.cursor = 'not-allowed';
+      }
+
+      radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = 1;
+          submitBtn.style.cursor = 'pointer';
+        });
+      });
+
+      submitBtn?.addEventListener('click', () => {
+        submitBtn.innerText = '載入中...';
+        submitBtn.style.opacity = 0.6;
+      });
+    });
+  </script>
+</div>
+
+{% endblock %}
+<script src="{{ url_for('static', filename='quiz_script.js') }}"></script>

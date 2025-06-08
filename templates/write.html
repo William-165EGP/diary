@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="display: flex; gap: 40px;">
+  <div style="flex: 1; background: #f0f0f0; padding: 20px; border-radius: 10px;">
+    <h3>給你的靈感</h3>
+    {% if sample %}
+    <p><strong>{{ sample.author }}</strong> 寫道：</p>
+    <p>{{ sample.content }}</p>
+    {% else %}
+    <p>目前還沒有公開的日記。</p>
+    {% endif %}
+  </div>
+
+
+  <div style="flex: 2;">
+    <h2>寫下你的心情</h2>
+    <form id="diaryForm" method="post">
+      <textarea id="content" name="content" rows="6" style="width:100%;" placeholder="寫點什麼吧..." required></textarea><br>
+      <label><input type="checkbox" name="public"> 公開這篇日記</label><br><br>
+      <button type="submit">送出</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('diaryForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const textarea = document.getElementById('content');
+    const wantSuggestion = confirm("你是否需要 Gemini 建議？");
+
+    if (wantSuggestion) {
+      try {
+        const response = await fetch('/gemini_suggestion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: textarea.value })
+        });
+        const data = await response.json();
+        textarea.value += '\n\n' + data.suggestion;
+      } catch (error) {
+        alert("⚠️ 取得 Gemini 建議失敗，將直接送出。");
+      }
+    }
+
+    // submit whatever gemini is selected
+    this.submit();
+  });
+</script>
+
+{% endblock %}
