@@ -14,6 +14,45 @@
           flex-direction: column;
           transition: background 1s ease-in-out;
         }
+        .menu-wrapper {
+            position: absolute; 
+            top: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+            background: white;
+        }
+
+        .menu-toggle {
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 45px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 10;
+            padding: 10px;
+            min-width: 150px;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 8px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .dropdown a:hover {
+            background-color: #f2f2f2;
+        }
         .canvas-container {
             position: relative;
             width: 100%;
@@ -161,10 +200,19 @@
     </style>
   </head>
   <body>
-      <div id="rainBox"></div>
-      <div class="content"></div>
+    <div class="menu-wrapper">
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+        <div class="dropdown" id="dropdownMenu">
+        <a href="/dashboard">所有日記</a>
+        <a href="/my_diary">我的日記</a>
+        <a href="/quiz_page">心理測驗</a>
+        </div>
+    </div>
 
-      <div class="canvas-container" >
+    <div id="rainBox"></div>
+    <div class="content"></div>
+
+    <div class="canvas-container" >
         <canvas id="backgroundCanvas"></canvas>
         <canvas id="catCanvas"></canvas>
 
@@ -179,14 +227,14 @@
             <div class="bar-container">
               <div id="hungerBar" class="bar hunger"></div>
             </div>
-          </div>
-          <div class="status">
+        </div>
+        <div class="status">
             <label>口渴</label>
             <div class="bar-container">
               <div id="thirstBar" class="bar thirst"></div>
             </div>
-          </div>
         </div>
+    </div>
 
         <div id="props-list">
           <img class="props-item" src="static/images/Props/Window.png" data-type="Window" draggable="true"/>
@@ -199,21 +247,21 @@
           <img class="props-item" src="static/images/Props/FoodBowl.png" data-type="FoodBowl" draggable="true"/>
           <img class="props-item" src="static/images/Props/WaterBowl.png" data-type="WaterBowl" draggable="true"/>
         </div>
-      </div>
-      <div id="guide-overlay">
+    </div>
+    <div id="guide-overlay">
         <div id="guide-modal">
-          <h2>遊戲說明</h2>
-          <ul>
+            <h2>遊戲說明</h2>
+            <ul>
             <li>點擊家具後，再點擊房間放置</li>
             <li>或者你也可以直接拖曳</li>
             <li>貓咪會吃飯、喝水、睡覺或玩球</li>
             <li>飢餓/口渴會隨時間下降</li>
             <li>重複點擊道具可移除</li>
             <li>食物和水每三分鐘更新一次</li>
-          </ul>
-          <p style="margin-top:10px; font-size: 0.9em; color: gray;">👉 點擊畫面任意處以開始遊戲</p>
+            </ul>
+            <p style="margin-top:10px; font-size: 0.9em; color: gray;">👉 點擊畫面任意處以開始遊戲</p>
         </div>
-      </div> 
+    </div> 
     
     <script>
         const bgCanvas = document.getElementById("backgroundCanvas");
@@ -255,6 +303,8 @@
         const catActionIndex = ["walkFront", "walkRight", "walkBack", "walkLeft", "sitDown", "idle", 'eat', 'sleep'];
 
         let selectedProps = null;
+        // 全域變數記錄當前拖曳物件
+        let draggingProps = null; 
         let  propsList = [];
         let usedPropsTypes = new Set(); 
         const PropsIsOnWall = new Map([
@@ -302,7 +352,7 @@
         const box=document.getElementById('rainBox');
         let boxHeight=box.clientHeight;
         let boxWidth=box.clientWidth;
-
+        const dropdown = document.getElementById('dropdownMenu');
         ///////////////////////////////////////////////////////////////////
 
 
@@ -540,26 +590,17 @@
                 }
             }
         }
-
-
-        bgCanvas.addEventListener("click", (e) => {
-            if (!selectedProps) return;
-            const rect = bgCanvas.getBoundingClientRect();
-            const image = selectedProps.image;
-            const type = selectedProps.type;
-            let x = e.clientX - rect.left;
-            let y = e.clientY - rect.top;
+        function putProp(rect, x, y, type, image){
             let mirror = false;
             if(PropsIsOnWall.get(type)){
-                if (!isPointInPolygon({ x: x, y: y }, rightWallPolygon)) 
-                    if (isPointInPolygon({ x: x, y: y }, leftWallPolygon)) 
+                if (!isPointInPolygon({ x: x, y: y }, rightWallPolygon))
+                    if (isPointInPolygon({ x: x, y: y }, leftWallPolygon))
                         mirror = true;
-                        else
-                            return;
-            }
-            else{
-                if (!isPointInPolygon({ x: x, y: y }, leftfloor)) 
-                    if (isPointInPolygon({ x: x, y: y }, rightfloor)) 
+                    else
+                        return;
+            } else {
+                if (!isPointInPolygon({ x: x, y: y }, leftfloor))
+                    if (isPointInPolygon({ x: x, y: y }, rightfloor))
                         mirror = true;
                     else
                         return;
@@ -569,23 +610,58 @@
             propsList.push({ image, type, mirror, x, y});
             usedPropsTypes.add(type);
             drawProps();
-            if (type === "FoodBowl") 
+
+            // 處理貓的互動
+            if (type === "FoodBowl")
                 triggerCatEat(x-image.width - 10, y - 45, 0);
-            if (type === "WaterBowl") 
+            if (type === "WaterBowl")
                 triggerCatEat(x-image.width - 10, y - 45, 1);
-            if (type === "ball") 
+            if (type === "ball")
                 triggerCatPlay(x-image.width - 10, y - 45);
-            if (type === "bed") 
+            if (type === "bed")
                 triggerCatSleep(x , y  - 20);
             document.querySelectorAll(".props-item").forEach(item => {
                 if (item.dataset.type === type) {
-                  item.classList.add("used");
+                    item.classList.add("used");
                 }
             });
-            selectedProps = null;
+        }
+        
 
+
+        // 道具拖曳開始
+        document.querySelectorAll(".props-item").forEach(item => {
+            item.addEventListener("dragstart", (e) => {
+                draggingProps = {
+                    type: item.dataset.type,
+                    image: new Image()
+                };
+                draggingProps.image.src = item.src;
+                // 道具透明
+                item.style.opacity = 0.5;
+            });
+            item.addEventListener("dragend", (e) => {
+                draggingProps = null;
+                item.style.opacity = "";
+            });
         });
 
+        // 背景允許放置
+        bgCanvas.addEventListener("dragover", (e) => {
+            e.preventDefault();
+        });
+
+        bgCanvas.addEventListener("drop", (e) => {
+                e.preventDefault();
+                if (!draggingProps) return;
+                const rect = bgCanvas.getBoundingClientRect();
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
+                let type = draggingProps.type;
+                let image = draggingProps.image;
+                putProp(rect, x, y, type, image);
+        });
+        
         document.querySelectorAll(".props-item").forEach(item => {
             item.addEventListener("click", () => {
                 const now = Date.now();
@@ -610,11 +686,18 @@
             });
         });
 
+        bgCanvas.addEventListener("click", (e) => {
+            if (!selectedProps) return;
+            const rect = bgCanvas.getBoundingClientRect();
+            const image = selectedProps.image;
+            const type = selectedProps.type;
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            putProp(rect, x, y, type, image);
+            selectedProps = null;
+        });
+
         setInterval(updatePropsAvailability, 1000); 
-
-
-          
-
 
         ///////////////////////////////////////////////////////////////////////////
 
@@ -644,35 +727,16 @@
         updateRealTime(); 
         setInterval(updateRealTime, 1000);
 
-
-        function autoPlayBGM() {
-            bgm.volume = 0;
-            const tryPlay = () => {
-                const playAttempt = bgm.play();
-
-                if (playAttempt !== undefined) {
-                    playAttempt
-                    .then(() => {
-                        let vol = 0;
-                        const fade = setInterval(() => {
-                        vol += 0.05;
-                        if (vol >= 0.3) {
-                            vol = 0.3;
-                            clearInterval(fade);
-                        }
-                        bgm.volume = vol;
-                        }, 100);
-                    })
-                    .catch(err => {
-                        console.log("瀏覽器阻擋自動播放，等待點擊觸發音樂");
-                        const onceClick = () => {
-                            autoPlayBGM(); 
-                            window.removeEventListener("click", onceClick);
-                        };
-                        window.addEventListener("click", onceClick);
-                    });
-                }
+        window.addEventListener("load", () => {
+          const guideOverlay = document.getElementById("guide-overlay");
+          if (guideOverlay) {
+            const dismissGuide = () => {
+              guideOverlay.style.display = "none";
+              bgm.volume = 0.3;
+              bgm.play().catch(()=>{}); // just be quiet if unable to play
+              window.removeEventListener("click", dismissGuide);
             };
+
             tryPlay();toggleMute
         }
 
@@ -685,6 +749,7 @@
               bgm.play().catch(()=>{}); // just be quiet if unable to play
               window.removeEventListener("click", dismissGuide);
             };
+
             setTimeout(() => {
               window.addEventListener("click", dismissGuide);
             }, 500);
@@ -697,7 +762,25 @@
             button.textContent = bgm.muted ? "🔇" : "🔊";
         }
 
-
+        function toggleMenu() {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+        document.addEventListener('click', function(event) {
+            const isClickInside = dropdown.contains(event.target) || event.target.classList.contains('menu-toggle');
+            if (!isClickInside) dropdown.style.display = 'none';
+        });
+        window.addEventListener("load", () => {
+            const guideOverlay = document.getElementById("guide-overlay");
+            if (guideOverlay) {
+                const dismissGuide = () => {
+                    guideOverlay.style.display = "none";
+                    window.removeEventListener("click", dismissGuide);
+                };
+                setTimeout(() => {
+                    window.addEventListener("click", dismissGuide);
+                }, 500); 
+            }
+        });
         ////////////////////////////下雨///////////////////////////////
 
         window.onresize=function(){
@@ -730,20 +813,6 @@
 
         ///////////////////////////////////////////////////////////////
 
-
-        window.addEventListener("load", () => {
-            const guideOverlay = document.getElementById("guide-overlay");
-            if (guideOverlay) {
-              const dismissGuide = () => {
-                guideOverlay.style.display = "none";
-                window.removeEventListener("click", dismissGuide);
-              };
-              setTimeout(() => {
-                window.addEventListener("click", dismissGuide);
-              }, 500); 
-            }
-        });
-
         function resizeCanvas() {
             const container = document.querySelector(".canvas-container");
             const width = container.clientWidth;
@@ -757,8 +826,10 @@
             drawProps(); 
             drawCat(catActionMap.get("idle")); 
         }
+
         window.addEventListener("resize", resizeCanvas);
         window.addEventListener("load", resizeCanvas);
+
 
         // 全域變數記錄當前拖曳物件
         let draggingProps = null;
@@ -832,6 +903,7 @@
             }
           });
         });
+
     </script>
   </body>
 </html>
