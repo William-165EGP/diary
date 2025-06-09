@@ -63,7 +63,7 @@
           <button onclick="login()" class="w-full py-3 rounded-lg bg-[#B3C8CF] text-white font-semibold hover:bg-[#A2BBC2]">登入</button>
           <p id="message" class="text-sm"></p>
           <hr class="my-4">
-          <p class="text-center">還沒有帳號？<a href="/register-page" class="text-[#6C584C] underline">前往註冊</a></p>
+          <p class="text-center">還沒有帳號？<a href="/register" class="text-[#6C584C] underline">前往註冊</a></p>
         </div>
       </div>
     </div>
@@ -88,7 +88,7 @@
       const data = await res.json();
       const message = document.getElementById('message');
       if (data.status === 'success') {
-        message.textContent = '登入成功，轉跳中...';
+        message.textContent = '登入成功，跳轉中...';
         message.style.color = 'green';
         setTimeout(() => window.location.href = '/dashboard', 800);
       } else {
