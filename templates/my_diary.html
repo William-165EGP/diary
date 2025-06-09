@@ -1,93 +1,30 @@
 {% extends "dashboard.html" %}
-{% block content %}
 
+{% block main_content %}
+<div class="w-full space-y-4">
+  <h2>{{ username }} 的日記</h2>
+  {% if diaries %}
+  {% for d in diaries %}
+  <div class="bg-white/80 backdrop-blur-md rounded-xl p-4 shadow mb-4">
+    <p><strong>時間：</strong> {{ d.created_at or '未知' }} （{{ time_since(d.created_at) }})</p>
+    <p><strong>公開狀態：</strong> {{ '公開' if d.public else '私人' }}</p>
+    <p>{{ d.content }}</p>
+    <form method="post" action="{{ url_for('delete_diary', diary_id=d.id) }}" onsubmit="return confirm('確定要刪除這篇日記嗎？')">
+      <button type="submit">🗑 刪除</button>
+    </form>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p>你還沒有寫過任何日記。</p>
+  {% endif %}
+</div>
+{% endblock %}
 
+{% block sidebar %}
 <style>
-  .menu-wrapper {
-    position: relative;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .menu-toggle {
-    font-size: 30px;
-    cursor: pointer;
-    padding: 10px;
-  }
-
-  .dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 45px;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    z-index: 10;
-    padding: 10px;
-    min-width: 150px;
-  }
-
-  .dropdown a {
-    display: block;
-    padding: 8px;
-    text-decoration: none;
-    color: black;
-  }
-
-  .dropdown a:hover {
-    background-color: #f2f2f2;
+  main > div:nth-child(2) {
+    display: none !important;
   }
 </style>
-
-<div class="menu-wrapper">
-  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-  <div id="dropdownMenu" class="dropdown">
-    <a href="/">所有日記</a>
-    <a href="/game">遊戲</a>
-    <a href="/quiz">心理測驗</a>
-  </div>
-</div>
-
-<script>
-  const dropdown = document.getElementById('dropdownMenu');
-
-  function toggleMenu() {
-    dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
-  }
-
-  document.addEventListener('click', function(event) {
-    const isClickInside = dropdown.contains(event.target) || event.target.classList.contains('menu-toggle');
-    if (!isClickInside) {
-      dropdown.style.display = 'none';
-    }
-  });
-</script>
-
-
-<h2>{{ username }} 的日記</h2>
-
-{% if diaries %}
-{% for d in diaries %}
-<div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
-  {% if d.created_at %}
-  <p><strong>時間：</strong> {{ d.created_at }}（{{ time_since(d.created_at) }}）</p>
-  {% else %}
-  <p><strong>時間：</strong> 未知</p>
-  {% endif %}
-  <p><strong>公開狀態：</strong> {{ '公開' if d.public else '私人' }}</p>
-  <p>{{ d.content }}</p>
-
-  <form method="post" action="{{ url_for('delete_diary', diary_id=d.id) }}" onsubmit="return confirm('確定要刪除這篇日記嗎？')">
-    <button type="submit">🗑 刪除</button>
-  </form>
-</div>
-{% endfor %}
-{% else %}
-<p>你還沒有寫過任何日記。</p>
-{% endif %}
-
-<a class="fab" href="{{ url_for('write') }}">🖊️</a>
-
 {% endblock %}
+

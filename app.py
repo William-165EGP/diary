@@ -88,8 +88,6 @@ def index():
         return redirect(url_for('login'))
     return redirect(url_for('dashboard'))
 
-    public_diaries = diaries_table.all()
-    return render_template('login.html', diaries=public_diaries, username=session['username'])
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
