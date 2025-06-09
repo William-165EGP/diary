@@ -1,23 +1,74 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>寫日記</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: #fffafc;
+      padding: 2rem;
+    }
+    h2, h3 {
+      color: #444;
+    }
+    textarea {
+      width: 100%;
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.6rem 1.5rem;
+      background-color: #8ac6d0;
+      border: none;
+      border-radius: 999px;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background-color: #6fb5c0;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+    .inspiration {
+      flex: 1;
+      background: #f0f0f0;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .form-area {
+      flex: 2;
+    }
+  </style>
+</head>
+<body>
 
-<div style="display: flex; gap: 40px;">
-  <div style="flex: 1; background: #f0f0f0; padding: 20px; border-radius: 10px;">
+<div class="container">
+  <div class="inspiration">
     <h3>給你的靈感</h3>
-    {% if sample %}
-    <p><strong>{{ sample.author }}</strong> 寫道：</p>
-    <p>{{ sample.content }}</p>
-    {% else %}
-    <p>目前還沒有公開的日記。</p>
-    {% endif %}
+    <!-- 以下區塊由伺服器端渲染 -->
+    <p><strong>某位使用者</strong> 寫道：</p>
+    <p>這是一段範例日記內容，用來提供你寫作的靈感。</p>
+    <!-- 若無內容可改為下列這行 -->
+    <!-- <p>目前還沒有公開的日記。</p> -->
   </div>
 
-
-  <div style="flex: 2;">
+  <div class="form-area">
     <h2>寫下你的心情</h2>
-    <form id="diaryForm" method="post">
-      <textarea id="content" name="content" rows="6" style="width:100%;" placeholder="寫點什麼吧..." required></textarea><br>
+    <form id="diaryForm" method="post" enctype="multipart/form-data">
+      <textarea id="content" name="content" rows="6" placeholder="寫點什麼吧..." required></textarea><br>
       <label><input type="checkbox" name="public"> 公開這篇日記</label><br><br>
+      <input type="file" name="image" accept="image/*" class="block">
       <button type="submit">送出</button>
     </form>
   </div>
@@ -44,9 +95,9 @@
       }
     }
 
-    // submit whatever gemini is selected
     this.submit();
   });
 </script>
 
-{% endblock %}
+</body>
+</html>

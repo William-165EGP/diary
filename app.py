@@ -8,6 +8,8 @@ import os
 import json
 from gemini import generate_encouragement
 from dotenv import load_dotenv
+import random
+from werkzeug.utils import secure_filename
 
 def time_since(timestr):
     try:
@@ -20,11 +22,10 @@ def time_since(timestr):
 app = Flask(__name__)
 load_dotenv()
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
-
-
 app.jinja_env.globals.update(time_since=time_since)
-
 app.jinja_env.globals.update(zip=zip)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 @app.route('/quiz', methods=['GET', 'POST'])
 def quiz():
@@ -85,40 +86,66 @@ def gemini_suggestion():
 def index():
     if 'username' not in session:
         return redirect(url_for('login'))
+    return redirect(url_for('dashboard'))
 
     public_diaries = diaries_table.all()
-    return render_template('diary_list.html', diaries=public_diaries, username=session['username'])
-
+    return render_template('login.html', diaries=public_diaries, username=session['username'])
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        success = register_user(request.form['username'], request.form['password'])
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
+        success = register_user(username, password)
         if success:
-            return redirect(url_for('login'))
+            return jsonify({'status': 'success', 'message': '註冊成功'})
         else:
-            return '使用者已存在'
-    return render_template('register.html')
+            return jsonify({'status': 'fail', 'message': '使用者已存在'})
+    else:
+        return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
-        if check_login(request.form['username'], request.form['password']):
-            session['username'] = request.form['username']
-            return redirect(url_for('index'))
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
+        if check_login(username, password):
+            session['username'] = username
+            return jsonify({'status': 'success', 'username': username})
         else:
-            error = '使用者名稱或密碼錯誤！'
+            return jsonify({'status': 'fail', 'message': '帳號或密碼錯誤'})
 
     public_diaries = [d for d in diaries_table.all() if d.get('public')]
     sample_diary = choice(public_diaries) if public_diaries else None
-    return render_template('login.html', sample=sample_diary, error=error)
-
+    return render_template('login.html', sample=sample_diary)
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
+@app.route('/dashboard')
+def dashboard():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    print(session['username'])
+    # 取得所有公開日記
+    public_diaries = [d for d in diaries_table.all() if d.get('public')]
+    public_diaries = sorted(public_diaries, key=lambda d: d['created_at'], reverse=True)
+    # 取得自己的日記
+    my_diaries = [d for d in diaries_table.all() if d.get('author') == session['username']]
+    random_post = random.choice(my_diaries) if my_diaries else None
+    return render_template(
+        'dashboard.html',  
+        public_diaries = public_diaries,
+        my_diaries = my_diaries,
+        random_post = random_post,
+        username = session['username']
+    )
 
 @app.route('/write', methods=['GET', 'POST'])
 def write():
@@ -128,10 +155,21 @@ def write():
     if request.method == 'POST':
         content = request.form['content']
         is_public = 'public' in request.form
+        image = request.files.get('image')
+        image_path = None
+        if image and image.filename != '':
+            print("接收到圖片：", image.filename)
+            filename = secure_filename(image.filename)
+            upload_folder = os.path.join(BASE_DIR, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            image.save(os.path.join(upload_folder, filename))
+            image_path = f'uploads/{filename}'  # 存在DB的路徑
+
         diaries_table.insert({
             'author': session['username'],
             'content': content,
             'public': is_public,
+            'image_path': image_path,
             'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
         return redirect(url_for('index'))
@@ -145,6 +183,7 @@ def write():
 def my_diary():
     if 'username' not in session:
         return redirect(url_for('login'))
+    print(session['username'])
 
     # doc_id
     diaries = [

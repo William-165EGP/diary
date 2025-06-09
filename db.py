@@ -23,3 +23,4 @@ def check_login(username, password):
 
 def hash_password(pwd):
     return hashlib.sha256(pwd.encode()).hexdigest()
+

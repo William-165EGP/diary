@@ -2,3 +2,7 @@
 /.env
 /.venv/
 /.idea/
+/.vscode/
+
+static/uploads/*
+!static/uploads/.gitkeep
