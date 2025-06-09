@@ -189,15 +189,15 @@
         </div>
 
         <div id="props-list">
-          <img class="props-item" src="static/images/Props/Window.png" data-type="Window" />
-          <img class="props-item" src="static/images/Props/Picture1.png" data-type="picture1" />
-          <img class="props-item" src="static/images/Props/Picture2.png" data-type="picture2" />
-          <img class="props-item" src="static/images/Props/Shelves.png" data-type="shelves" />
-          <img class="props-item" src="static/images/Props/Plant.png" data-type="plant" />
-          <img class="props-item" src="static/images/Props/Bed.png" data-type="bed" />
-          <img class="props-item" src="static/images/Props/Ball.png" data-type="ball" />
-          <img class="props-item" src="static/images/Props/FoodBowl.png" data-type="FoodBowl" />
-          <img class="props-item" src="static/images/Props/WaterBowl.png" data-type="WaterBowl" />
+          <img class="props-item" src="static/images/Props/Window.png" data-type="Window" draggable="true"/>
+          <img class="props-item" src="static/images/Props/Picture1.png" data-type="picture1" draggable="true"/>
+          <img class="props-item" src="static/images/Props/Picture2.png" data-type="picture2" draggable="true"/>
+          <img class="props-item" src="static/images/Props/Shelves.png" data-type="shelves" draggable="true"/>
+          <img class="props-item" src="static/images/Props/Plant.png" data-type="plant" draggable="true"/>
+          <img class="props-item" src="static/images/Props/Bed.png" data-type="bed" draggable="true"/>
+          <img class="props-item" src="static/images/Props/Ball.png" data-type="ball" draggable="true"/>
+          <img class="props-item" src="static/images/Props/FoodBowl.png" data-type="FoodBowl" draggable="true"/>
+          <img class="props-item" src="static/images/Props/WaterBowl.png" data-type="WaterBowl" draggable="true"/>
         </div>
       </div>
       <div id="guide-overlay">
@@ -205,6 +205,7 @@
           <h2>遊戲說明</h2>
           <ul>
             <li>點擊家具後，再點擊房間放置</li>
+            <li>或者你也可以直接拖曳</li>
             <li>貓咪會吃飯、喝水、睡覺或玩球</li>
             <li>飢餓/口渴會隨時間下降</li>
             <li>重複點擊道具可移除</li>
@@ -674,7 +675,22 @@
             };
             tryPlay();toggleMute
         }
-        window.addEventListener("load", autoPlayBGM);
+
+        window.addEventListener("load", () => {
+          const guideOverlay = document.getElementById("guide-overlay");
+          if (guideOverlay) {
+            const dismissGuide = () => {
+              guideOverlay.style.display = "none";
+              bgm.volume = 0.3;
+              bgm.play().catch(()=>{}); // just be quiet if unable to play
+              window.removeEventListener("click", dismissGuide);
+            };
+            setTimeout(() => {
+              window.addEventListener("click", dismissGuide);
+            }, 500);
+          }
+        });
+
         function toggleMute() {
             bgm.muted = !bgm.muted;
             const button = document.getElementById("audio-ui");
@@ -743,6 +759,79 @@
         }
         window.addEventListener("resize", resizeCanvas);
         window.addEventListener("load", resizeCanvas);
+
+        // 全域變數記錄當前拖曳物件
+        let draggingProps = null;
+
+        // 道具拖曳開始
+        document.querySelectorAll(".props-item").forEach(item => {
+          item.addEventListener("dragstart", (e) => {
+            draggingProps = {
+              type: item.dataset.type,
+              image: new Image()
+            };
+            draggingProps.image.src = item.src;
+            // 道具透明
+            item.style.opacity = 0.5;
+          });
+          item.addEventListener("dragend", (e) => {
+            draggingProps = null;
+            item.style.opacity = "";
+          });
+        });
+
+        // 背景允許放置
+        bgCanvas.addEventListener("dragover", (e) => {
+          e.preventDefault();
+        });
+
+        bgCanvas.addEventListener("drop", (e) => {
+          e.preventDefault();
+          if (!draggingProps) return;
+          const rect = bgCanvas.getBoundingClientRect();
+          let x = e.clientX - rect.left;
+          let y = e.clientY - rect.top;
+          let type = draggingProps.type;
+          let image = draggingProps.image;
+          let mirror = false;
+
+          // (下方同你原本的區域判斷...)
+
+          if(PropsIsOnWall.get(type)){
+            if (!isPointInPolygon({ x: x, y: y }, rightWallPolygon))
+              if (isPointInPolygon({ x: x, y: y }, leftWallPolygon))
+                mirror = true;
+              else
+                return;
+          } else {
+            if (!isPointInPolygon({ x: x, y: y }, leftfloor))
+              if (isPointInPolygon({ x: x, y: y }, rightfloor))
+                mirror = true;
+              else
+                return;
+          }
+          x -= image.width/2;
+          y -= image.height/2;
+          propsList.push({ image, type, mirror, x, y});
+          usedPropsTypes.add(type);
+          drawProps();
+
+          // 處理貓的互動
+          if (type === "FoodBowl")
+            triggerCatEat(x-image.width - 10, y - 45, 0);
+          if (type === "WaterBowl")
+            triggerCatEat(x-image.width - 10, y - 45, 1);
+          if (type === "ball")
+            triggerCatPlay(x-image.width - 10, y - 45);
+          if (type === "bed")
+            triggerCatSleep(x , y  - 20);
+
+          document.querySelectorAll(".props-item").forEach(item => {
+            if (item.dataset.type === type) {
+              item.classList.add("used");
+            }
+          });
+        });
     </script>
   </body>
 </html>
