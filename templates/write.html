@@ -4,7 +4,26 @@
   <meta charset="UTF-8">
   <title>寫日記</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(270deg, #f9e4e0, #dce8f4, #f6ede0);
+      background-size: 600% 600%;
+      z-index: -1;
+      animation: flow 20s ease infinite;
+    }
+    @keyframes flow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
     body {
       font-family: 'Noto Sans TC', sans-serif;
       background-color: #fffafc;
@@ -23,7 +42,7 @@
       border: 1px solid #ccc;
     }
 
-    button {
+    /* button {
       margin-top: 1rem;
       padding: 0.6rem 1rem;
       background-color: #8ac6d0;
@@ -34,7 +53,7 @@
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s ease;
-    }
+    } */
 
     button:hover {
       background-color: #6fb5c0;
@@ -129,6 +148,100 @@
     }
   </style>
 </head>
+<body class="bg-transparent font-sans">
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 py-4 bg-white/70 backdrop-blur-md shadow-md">
+  <h1 class="text-2xl font-bold text-[#6C584C]">Exchange Diary</h1>
+  <nav class="space-x-4">
+    <a href="/dashboard" class="text-[#6C584C]">所有日記</a>
+    <a href="/my_diary" class="text-[#6C584C]">我的日記</a>
+    <a href="/quiz" class="text-[#6C584C]">心理測驗</a>
+    <a href="/game" class="text-[#6C584C]">小遊戲</a>
+    <a href="/logout" class="text-[#6C584C] underline">登出</a>
+  </nav>
+</header>
+
+<main class="max-w-6xl mx-auto p-6 mt-[72px] flex gap-6">
+  <div class="container">
+    <div class="inspiration">
+      <h3 class="text-xl font-semibold mb-4">給你的靈感</h3>
+      <p><strong>某位使用者</strong> 寫道：</p>
+      <p>這是一段範例日記內容，用來提供你寫作的靈感。</p>
+    </div>
+
+    <div class="form-area">
+      <h2 class="text-xl font-semibold mb-4">寫下你的心情</h2>
+      <form id="diaryForm" method="post" enctype="multipart/form-data">
+        <div class="mood-container">
+          <span class="mood-label">心情：</span>
+          <div class="mood-options">
+            <input type="radio" id="mood_happy" name="mood" value="happy" required>
+            <label for="mood_happy" title="開心">😊</label>
+
+            <input type="radio" id="mood_sad" name="mood" value="sad">
+            <label for="mood_sad" title="難過">😢</label>
+
+            <input type="radio" id="mood_angry" name="mood" value="angry">
+            <label for="mood_angry" title="憤怒">😠</label>
+
+            <input type="radio" id="mood_excited" name="mood" value="excited">
+            <label for="mood_excited" title="興奮">🤩</label>
+
+            <input type="radio" id="mood_calm" name="mood" value="calm">
+            <label for="mood_calm" title="平靜">😌</label>
+
+            <input type="radio" id="mood_anxious" name="mood" value="anxious">
+            <label for="mood_anxious" title="焦慮">😰</label>
+          </div>
+        </div>
+        <h1></h1>
+        <textarea id="content" name="content" rows="6" placeholder=" 寫點什麼吧..." required></textarea><br>
+        
+        <label><input type="checkbox" name="public"> 公開這篇日記</label><br><br>
+
+        <input type="file" name="image" accept="image/*"><br><br>
+
+        <h3 class="text-xl font-semibold mb-4">或畫點什麼吧</h3>
+
+        <div class="tools flex flex-row flex-wrap items-center gap-4 mb-4">
+          <div class="flex items-center gap-2">
+            <span>筆刷顏色：</span>
+            <input type="color" id="penColor" value="#000000" class="w-10 h-8 p-0 border rounded">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span>筆刷粗細：</span>
+            <input type="range" id="penSize" min="1" max="20" value="3" class="w-32">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span>工具：</span>
+            <select id="tool" class="border border-gray-300 rounded px-2 py-1">
+              <option value="pen">畫筆</option>
+              <option value="eraser">橡皮擦</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button" id="clearCanvas"
+              class="px-4 py-2 bg-[#61c9d0] text-white rounded-full hover:bg-[#4fb5c0] transition">
+              清除畫布
+            </button>
+            <button type="button" id="downloadCanvas"
+              class="px-4 py-2 bg-[#88cc88] text-white rounded-full hover:bg-[#6fbf6f] transition">
+              下載圖片
+            </button>
+          </div>
+        </div>
+
+        <canvas id="drawingCanvas" width="600" height="400"></canvas>
+        <input type="hidden" name="drawing" id="drawingInput">
+
+        <button type="submit" class="mt-4 px-6 py-2 bg-[#8ac6d0] text-white text-lg font-semibold rounded-full hover:bg-[#6fb5c0] transition-all">
+          送出
+        </button>
+      </form>
+    </div>
+=======
 <body>
 <div class="menu-wrapper">
   <div class="menu-toggle" onclick="toggleMenu()">☰</div>
@@ -148,44 +261,7 @@
     <p>這是一段範例日記內容，用來提供你寫作的靈感。</p>
   </div>
 
-  <div class="form-area">
-    <h2>寫下你的心情</h2>
-    <form id="diaryForm" method="post" enctype="multipart/form-data">
-      <textarea id="content" name="content" rows="6" placeholder="寫點什麼吧..." required></textarea><br>
-
-      <label><input type="checkbox" name="public"> 公開這篇日記</label><br><br>
-
-      <input type="file" name="image" accept="image/*"><br><br>
-
-      <h3>或畫點什麼吧</h3>
-
-      <div class="tools">
-        <label>筆刷顏色：
-          <input type="color" id="penColor" value="#000000">
-        </label>
-
-        <label>筆刷粗細：
-          <input type="range" id="penSize" min="1" max="20" value="3">
-        </label>
-
-        <label>工具：
-          <select id="tool">
-            <option value="pen">畫筆</option>
-            <option value="eraser">橡皮擦</option>
-          </select>
-        </label>
-
-        <button type="button" id="clearCanvas" style="background-color:#61c9d0;">清除畫布</button>
-        <button type="button" id="downloadCanvas" style="background-color:#88cc88;">下載圖片</button>
-      </div>
-
-      <canvas id="drawingCanvas" width="600" height="400"></canvas>
-      <input type="hidden" name="drawing" id="drawingInput">
-
-      <button type="submit">送出</button>
-    </form>
-  </div>
-</div>
+</main>
 
 <script>
   const dropdown = document.getElementById('dropdownMenu');

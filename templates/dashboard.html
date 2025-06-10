@@ -47,7 +47,28 @@
     {% block main_content %}
     {% for post in public_diaries %}
     <div class="bg-white/80 backdrop-blur-md rounded-xl p-4 shadow">
-      <p class="text-[#6C584C] font-semibold mb-2">{{ post.author if post.public else '匿名' }}</p>
+      <p class="text-[#6C584C] font-semibold mb-2 flex items-center gap-2">
+        {{ post.author if post.public else '匿名' }}
+        {% if post.mood %}
+        <span>
+          {% if post.mood == 'happy' %}
+            😊 
+          {% elif post.mood == 'sad' %}
+            😢 
+          {% elif post.mood == 'angry' %}
+            😠 
+          {% elif post.mood == 'excited' %}
+            🤩
+          {% elif post.mood == 'calm' %}
+            😌
+          {% elif post.mood == 'anxious' %}
+            😰
+          {% else %}
+            {{ post.mood }}
+          {% endif %}
+        </span>
+        {% endif %}
+      </p>
       <p class="text-gray-700 whitespace-pre-line">{{ post.content }}</p>
       <p class="text-xs text-gray-500 mt-2">{{ time_since(post.created_at) }}</p>
       {% if post.image_path %}
@@ -65,7 +86,27 @@
     {% block sidebar %}
     <h2 class="text-lg font-bold text-[#6C584C] mb-3">📖 隨機回顧</h2>
     {% if random_post %}
-    <p class="text-[#6C584C] font-semibold mb-1">{{ random_post.author if random_post.public else '匿名' }}</p>
+    <p class="text-[#6C584C] font-semibold mb-1">{{ random_post.author if random_post.public else '匿名' }}
+    {% if random_post.mood %}
+        <span>
+          {% if random_post.mood == 'happy' %}
+            😊 
+          {% elif random_post.mood == 'sad' %}
+            😢 
+          {% elif random_post.mood == 'angry' %}
+            😠 
+          {% elif random_post.mood == 'excited' %}
+            🤩
+          {% elif random_post.mood == 'calm' %}
+            😌
+          {% elif random_post.mood == 'anxious' %}
+            😰
+          {% else %}
+            {{ random_post.mood }}
+          {% endif %}
+        </span>
+        {% endif %}
+    </p>
     <p class="text-gray-700 whitespace-pre-line line-clamp-6">{{ random_post.content }}</p>
     <p class="text-xs text-gray-500 mt-2">{{ time_since(random_post.created_at) }}</p>
     {% if random_post.image_path %}

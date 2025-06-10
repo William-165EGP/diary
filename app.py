@@ -160,6 +160,7 @@ def write():
 
     if request.method == 'POST':
         content = request.form['content']
+        mood = request.form.get('mood')  
         is_public = 'public' in request.form
         image = request.files.get('image')
         image_path = None
@@ -174,6 +175,7 @@ def write():
         diaries_table.insert({
             'author': session['username'],
             'content': content,
+            'mood': mood,
             'public': is_public,
             'image_path': image_path,
             'created_at': datetime.now(tz_utc_8).strftime('%Y-%m-%d %H:%M:%S')
