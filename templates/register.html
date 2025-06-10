@@ -88,6 +88,12 @@
       const message = document.getElementById('message');
       message.textContent = data.message;
       message.style.color = data.status === 'success' ? 'green' : 'red';
+      if (data.status === 'success') {
+        // 800 ms redirect to index
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 800);
+      }
     }
   </script>
 </body>

@@ -88,8 +88,12 @@ def index():
         return redirect(url_for('login'))
     return redirect(url_for('dashboard'))
 
-    public_diaries = diaries_table.all()
-    return render_template('login.html', diaries=public_diaries, username=session['username'])
+@app.route('/game')
+def play_game():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('game.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -154,6 +158,7 @@ def write():
 
     if request.method == 'POST':
         content = request.form['content']
+        mood = request.form.get('mood')  
         is_public = 'public' in request.form
         image = request.files.get('image')
         image_path = None
@@ -168,6 +173,7 @@ def write():
         diaries_table.insert({
             'author': session['username'],
             'content': content,
+            'mood': mood,
             'public': is_public,
             'image_path': image_path,
             'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -214,4 +220,4 @@ def time_since(timestr):
         return "unknown time"
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(port=5002, host="0.0.0.0", debug=False)
