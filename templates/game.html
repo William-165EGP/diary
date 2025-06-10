@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SimpleGame</title>
   <style>
+
     body{
       margin: 0;
       height: 100vh;
@@ -56,20 +57,34 @@
     .canvas-container {
       position: relative;
       width: 100%;
-      max-width: 800px;
+      max-width: 700px;
       aspect-ratio: 1 / 1;
-      top: -20px;
     }
+    /* .canvas-container {
+        position: relative;
+        width: 90vw;
+        max-width: 600px;
+        aspect-ratio: 1 / 1;
+        margin-top: 20px;
+    } */
+    /* canvas {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    } */
     canvas {
       position: absolute;
-      top: -10px;
+      top: -50px;
       width: 100%;
       height: 100%;
       border: 1px solid white;
     }
+
     #backgroundCanvas {
       background-image: url(static/images/Props/Room.png);
-      background-size: cover;
+      /* background-size: cover; */
       background-repeat: no-repeat;
       background-position: center;
       z-index: 0;
@@ -80,7 +95,7 @@
     }
     #props-list {
       position: absolute;
-      bottom: 10px;
+      bottom: 70px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -111,7 +126,7 @@
     }
     #time-ui {
       position: absolute;
-      top: 50px;
+      top: 40px;
       left: 20px;
       font-size: 1.5em;
       font-family: monospace;
@@ -120,14 +135,12 @@
     }
     #audio-ui {
       position: absolute;
-      top: 10px;
       left: 20px;
       font-size: 1.5em;
       z-index: 9999;
     }
     #status-bars {
       position: absolute;
-      top: 10px;
       right: 10px;
       width: 150px;
       font-family: sans-serif;
@@ -205,7 +218,8 @@
   <div class="dropdown" id="dropdownMenu">
     <a href="/dashboard">所有日記</a>
     <a href="/my_diary">我的日記</a>
-    <a href="/quiz_page">心理測驗</a>
+    <a href="/quiz">心理測驗</a>
+    <a href="/logout">登出</a>
   </div>
 </div>
 
@@ -263,19 +277,19 @@
   </div>
 </div>
 
+
 <script>
   const bgCanvas = document.getElementById("backgroundCanvas");
   const bgCtx = bgCanvas.getContext("2d");
   const catCanvas = document.getElementById("catCanvas");
   const catCtx = catCanvas.getContext("2d");
-
   const catSprite = new Image();
   catSprite.src = 'static/images/Cat.png';
   const catFrameWidth = 88.25;
   const catFrameHeight = 88.375;
   const catFrameCount1 = 4;
   const catFrameCount2 = 2;
-  let catX = 300, catY = 300.0;
+  let catX = 500, catY = 340.0;
   let catFrameIndex = 0;
   let catStepSpeed  = 5;
   let catIsMove = false;
@@ -320,29 +334,29 @@
   ]);
 
 
-  const rightWallPolygon = [
-    { x: 420, y: 230 },
-    { x: 420,  y: 100 },
-    { x: 700, y: 230 },
-    { x: 700, y: 380 }
-  ];
   const leftWallPolygon = [
-    { x: 330, y: 230 },
-    { x: 330,  y: 100 },
-    { x: 50, y: 230 },
-    { x: 50, y: 380 }
+    { x: 345, y: 143 },
+    { x: 345,  y: 289 },
+    { x: 129, y: 400 },
+    { x: 124, y: 264 }
+  ];
+  const rightWallPolygon = [
+    { x: 358, y: 143 },
+    { x: 583,  y: 262 },
+    { x: 577, y: 406 },
+    { x: 364, y: 290 }
   ];
   const floorPolygon = [
-    { x: 403, y: 309 },
-    { x: 37.5,  y: 504 },
-    { x: 400, y: 650 },
-    { x: 740.5, y: 480 }
+    { x: 352, y: 299 },
+    { x: 131,  y: 414 },
+    { x: 352, y: 525 },
+    { x: 575, y: 416 }
   ];
   const floorPolygonCat = [
-    { x: 360, y: 250 },
-    { x: 38,  y: 430 },
-    { x: 360, y: 600 },
-    { x: 680, y: 430 }
+    { x: 310, y: 250 },
+    { x: 120,  y: 340 },
+    { x: 310, y: 450 },
+    { x: 500, y: 340 }
   ];
   const leftfloor = floorPolygon.slice(0, 3);
   const rightfloor = [floorPolygon[0], floorPolygon[2], floorPolygon[3]];
@@ -354,6 +368,7 @@
   let boxWidth=box.clientWidth;
   const dropdown = document.getElementById('dropdownMenu');
   ///////////////////////////////////////////////////////////////////
+
 
 
   function wait(ms) {

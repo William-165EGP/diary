@@ -9,6 +9,8 @@
         :root {
             --cr-main-1: #a0d6e6;
             --cr-main-2: #f7a7e7;
+            /* NEW: Define base font size for better scaling */
+            --base-font-size: 16px;
         }
 
         * {
@@ -16,14 +18,56 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Noto Sans TC', sans-serif;
+            /* MODIFIED: Set font size relative to root */
+            font-size: var(--base-font-size);
         }
 
         body {
             min-height: 100vh;
             background-color: #fffafc;
-            padding: 2rem;
+            /* MODIFIED: Reduced padding for high-DPI */
+            padding: 1rem;
             position: relative;
             overflow: hidden;
+        }
+
+        .menu-wrapper {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .menu-toggle {
+            /* MODIFIED: Smaller font size */
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 45px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 10;
+            padding: 8px;
+            min-width: 120px;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 6px;
+            text-decoration: none;
+            color: black;
+            /* NEW: Smaller font size */
+            font-size: 0.85rem;
+        }
+
+        .dropdown a:hover {
+            background-color: #f2f2f2;
         }
 
         .blobs {
@@ -38,7 +82,8 @@
         }
 
         .blob {
-            width: max(240px, 28vw);
+            /* MODIFIED: Reduced blob size for better proportionality */
+            width: max(180px, 20vw);
             aspect-ratio: 1;
             border-radius: 50%;
             position: absolute;
@@ -67,30 +112,36 @@
         .result-container {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 1.5rem;
-            padding: 2rem;
-            max-width: 600px;
-            margin: 2rem auto;
+            /* MODIFIED: Reduced padding and max-width */
+            padding: 1.5rem;
+            max-width: 400px; /* Adjusted for better fit on high-DPI */
+            margin: 1.5rem auto;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            line-height: 1.8;
+            line-height: 1.6; /* Slightly reduced line height */
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
+            /* NEW: Smaller font size */
+            font-size: 1.5rem;
         }
 
         p {
-            margin: 0.75rem 0;
+            margin: 0.5rem 0;
+            /* NEW: Smaller font size */
+            font-size: 0.9rem;
         }
 
         .retry-btn {
-            margin-top: 2rem;
-            padding: 0.75rem 2.5rem;
+            margin-top: 1.5rem;
+            /* MODIFIED: Reduced padding and font size */
+            padding: 0.5rem 2rem;
             border: none;
             background: #c18fd1;
             color: white;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             border-radius: 999px;
             cursor: pointer;
             display: block;
@@ -109,9 +160,33 @@
             transform: scale(0.98);
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
+
+        /* NEW: Media query for high-DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+            :root {
+                --base-font-size: 14px; /* Smaller base font for high-DPI */
+            }
+            .result-container {
+                max-width: 360px; /* Further reduce for high-DPI */
+            }
+            .blob {
+                width: max(150px, 18vw); /* Smaller blobs */
+            }
+        }
     </style>
 </head>
 <body>
+
+<div class="menu-wrapper">
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <div class="dropdown" id="dropdownMenu">
+        <a href="/dashboard">所有日記</a>
+        <a href="/my_diary">我的日記</a>
+        <a href="/game">遊戲</a>
+        <a href="/logout">登出</a>
+    </div>
+</div>
+
 <div class="blobs">
     <div class="blob"></div>
     <div class="blob"></div>
@@ -139,4 +214,15 @@
     </form>
 </div>
 </body>
+<script>
+    const dropdown = document.getElementById('dropdownMenu');
+    function toggleMenu() {
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    document.addEventListener('click', function(event) {
+        const isClickInside = dropdown.contains(event.target) || event.target.classList.contains('menu-toggle');
+        if (!isClickInside) dropdown.style.display = 'none';
+    });
+</script>
 </html>

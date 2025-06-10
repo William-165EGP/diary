@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
-from db import users_table, diaries_table, register_user, check_login
-import hashlib
+from db import diaries_table, register_user, check_login
 from random import choice
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import humanize
 import os
 import json
@@ -11,11 +10,14 @@ from dotenv import load_dotenv
 import random
 from werkzeug.utils import secure_filename
 
+tz_utc_8 = timezone(timedelta(hours=8))
+
 def time_since(timestr):
     try:
-        created_time = datetime.strptime(timestr, '%Y-%m-%d %H:%M:%S')
-        now = datetime.now()
-        return humanize.naturaltime(now - created_time)
+        created_time = datetime.strptime(timestr, '%Y-%m-%d %H:%M:%S').replace(tzinfo=tz_utc_8)
+        created_time_utc = created_time.astimezone(timezone.utc)
+        now_utc = datetime.now(timezone.utc)
+        return humanize.naturaltime(now_utc - created_time_utc)
     except:
         return "unknown time"
 
@@ -176,7 +178,7 @@ def write():
             'mood': mood,
             'public': is_public,
             'image_path': image_path,
-            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': datetime.now(tz_utc_8).strftime('%Y-%m-%d %H:%M:%S')
         })
         return redirect(url_for('index'))
 
@@ -210,14 +212,6 @@ def delete_diary(diary_id):
         diaries_table.remove(doc_ids=[diary_id])
 
     return redirect(url_for('my_diary'))
-
-def time_since(timestr):
-    try:
-        created_time = datetime.strptime(timestr, '%Y-%m-%d %H:%M:%S')
-        now = datetime.now()
-        return humanize.naturaltime(now - created_time)
-    except:
-        return "unknown time"
 
 if __name__ == '__main__':
     app.run(port=5002, host="0.0.0.0", debug=False)
