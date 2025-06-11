@@ -1,4 +1,4 @@
-/data/database.json
+/database.json
 /.env
 /.venv/
 /.idea/
@@ -8,4 +8,4 @@ __pycache__/
 *.pyc
 
 static/uploads/*
-!static/uploads/.gitkeep
+!static/uploads/.gtkeep

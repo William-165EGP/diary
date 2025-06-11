@@ -1,7 +1,7 @@
 from tinydb import TinyDB, Query
 import hashlib
 
-db = TinyDB('data/database.json')
+db = TinyDB('database.json')
 users_table = db.table('users')
 diaries_table = db.table('diaries')
 
