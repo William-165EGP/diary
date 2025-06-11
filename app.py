@@ -137,7 +137,7 @@ def logout():
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
-    
+
     print(session['username'])
     # 取得所有公開日記
     public_diaries = [d for d in diaries_table.all() if d.get('public')]
@@ -146,7 +146,7 @@ def dashboard():
     my_diaries = [d for d in diaries_table.all() if d.get('author') == session['username']]
     random_post = random.choice(my_diaries) if my_diaries else None
     return render_template(
-        'dashboard.html',  
+        'dashboard.html',
         public_diaries = public_diaries,
         my_diaries = my_diaries,
         random_post = random_post,
@@ -160,7 +160,7 @@ def write():
 
     if request.method == 'POST':
         content = request.form['content']
-        mood = request.form.get('mood')  
+        mood = request.form.get('mood')
         is_public = 'public' in request.form
         image = request.files.get('image')
         image_path = None
@@ -193,12 +193,24 @@ def my_diary():
         return redirect(url_for('login'))
     print(session['username'])
 
-    # doc_id
-    diaries = [
-        {**d, 'id': d.doc_id}
-        for d in diaries_table.all()
-        if d.get('author') == session['username']
-    ]
+    # 取得用戶的日記，並包含 doc_id 和格式化後的日期
+    diaries = []
+    for d in diaries_table.all():
+        if d.get('author') == session['username']:
+            # 格式化 created_at 為 YYYY-MM-DD
+            try:
+                created_at = datetime.strptime(d['created_at'], '%Y-%m-%d %H:%M:%S')
+                formatted_date = created_at.strftime('%Y-%m-%d')
+            except ValueError:
+                formatted_date = d['created_at']  # 保留原始值以防格式錯誤
+            diaries.append({
+                **d,
+                'id': d.doc_id,
+                'formatted_date': formatted_date
+            })
+
+    # 按日期降序排列日記
+    diaries = sorted(diaries, key=lambda d: d['created_at'], reverse=True)
 
     return render_template('my_diary.html', diaries=diaries, username=session['username'])
 
